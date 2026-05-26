@@ -64,6 +64,7 @@ Links to doc pages are followed by a number indicating the [version](version-his
   * [Web Application Support Variables](web-app-support.html) - 3.0.0
   * [Debugging Assistance](debugging-assistance.html) - 3.0.0
 * [Automated Analysis with Python Scripts](automated-analysis.html) - 3.0.0
+  * [Python Setup for Repository Contributors](python-setup.html) - 3.4.2
   * [Selecting Ouput Variables for a Python Script](selecting-output-variables.html) - 3.0.0
   * [Logging Output for Multiple Scenarios](logging-output.html)- 3.0.0
   * [Testing Policy Combinations](testing-policy-combinations.html) - 3.0.0

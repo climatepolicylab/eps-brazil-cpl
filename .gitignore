@@ -32,3 +32,8 @@ RECOVERED_*.mdl
 # Windows applications' hidden temporary backup files
 ~*
 csv_graphs
+
+# Local Python environments
+.venv/
+__pycache__/
+*.pyc
