@@ -53,7 +53,7 @@ The model folder will contain the following files and folders:
 
 * `Cost Curve Generator.xlsx`, an Excel file that enables users to create cost curve diagrams offline (similar to the cost curve diagrams available through the EPS's web interface)
 
-* four scripts in the Python programming language (with `.py` extension), used to allow for batch runs and other automated behavior.  For instructions, see the [documentation pages on using the Python scripts](automated-analysis.html).
+* four scripts in the Python programming language (with `.py` extension), used to allow for batch runs and other automated behavior.  For instructions, see the [documentation pages on using the Python scripts](automated-analysis.html).  If you cloned the repository from Git rather than downloading a packaged release, see [Python Setup for Repository Contributors](python-setup.html) for the recommended `uv`-based setup.
 
 * `EPS.mdl`, the model source code, suitable for use in Vensim Pro or Vensim DSS (and viewable in a text editor)
 
@@ -71,4 +71,4 @@ The model folder will contain the following files and folders:
 
 * `WebAppData.xlsx`, a spreadsheet that contains information used by the online web application that runs the model
 
-If you are using Vensim Model Reader, the only files you will need are the compiled version of the model (with .vpmx extension) and the InputData folder.  The .mdl file and .vgd file are only useful if you have Vensim Pro or Vensim DSS.  (A copy of GraphDefinitions.vgd is bundled into the compiled .vpmx file, so you do not need the graph definitions text file to view graphs when using the compiled version of the model.)  The .py and .lst files are only useful if you have Vensim DSS (because this is the only version of Vensim that supports scripts).  To use these scripts, you will also need to have [Python 3](https://www.python.org/downloads/) installed.  For more information, see the [Automated Analysis with Python Scripts](automated-analysis.html) page.
+If you are using Vensim Model Reader, the only files you will need are the compiled version of the model (with .vpmx extension) and the InputData folder.  The .mdl file and .vgd file are only useful if you have Vensim Pro or Vensim DSS.  (A copy of GraphDefinitions.vgd is bundled into the compiled .vpmx file, so you do not need the graph definitions text file to view graphs when using the compiled version of the model.)  The .py and .lst files are only useful if you have Vensim DSS (because this is the only version of Vensim that supports scripts).  To use these scripts from a Git clone, follow the repository's `uv`-based Python setup on the [Python Setup for Repository Contributors](python-setup.html) page.  For more information about the overall scripting workflow, see the [Automated Analysis with Python Scripts](automated-analysis.html) page.

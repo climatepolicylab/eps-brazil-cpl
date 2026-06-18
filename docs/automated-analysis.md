@@ -38,7 +38,9 @@ If you already own Vensim DSS, please be sure that it is version 8 or later, and
 
 ### Python 3
 
-Python 3 is a free and open source programming language.  You can download and install Python 3 on your system from the [official Python website](https://www.python.org/).  It is available for many operating systems, including Windows and Mac.
+If you cloned this repository from Git, the recommended setup path is to use `uv` with the repository's checked-in Python metadata.  The standard interpreter for this repository is Python 3.14.  See the [Python Setup for Repository Contributors](python-setup.html) page for the exact setup steps.
+
+If you are working from a packaged EPS download rather than a Git clone, you still need Python 3 installed on your system before using the Python scripts.
 
 ### Text Editor for Programmers
 
@@ -64,7 +66,7 @@ More detailed instructions about how to use each Python script are available on 
 
 2. In your text editor, open the variable output list file used by the Python script (see the "Output Variable Lists" section above for details).  Edit it to include each of the variables that you wish to be included in the output file (and remove variables you do not want included).  This process is described more thoroughly on the [Selecting Ouput Variables for a Python Script](selecting-output-variables.html) documentation page.
 
-3. Double-click the Python script to execute it.  It will produce a Vensim command script (with `.cmd` extension).
+3. If you are using a Git clone of this repository, run the Python script through `uv`, such as `uv run python CreateDataLoggingScript.py`.  It will produce a Vensim command script (with `.cmd` extension).  If your `.py` files are associated with Python and you are working from a packaged EPS download, you may also double-click the script to execute it.
 
 4. Open Vensim DSS.  Choose `File > Open Model`.  From the drop-down menu above the `Open` and `Cancel` buttons, select `Command Scripts (*.cmd)`.  Select the command script you just created and click `Open`.
 
