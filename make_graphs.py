@@ -1,5 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
 """
+#!/usr/bin/env python3
+
+
 Generate bright, modern graphs from EPS TSV output.
 """
 
@@ -28,8 +31,7 @@ def parse_tsv(tsv_path: Path) -> pd.DataFrame:
                 continue
             parts = stripped.split("\t")
             rows.append(parts)
-            if len(parts) > max_cols:
-                max_cols = len(parts)
+            max_cols = max(max_cols, len(parts))
 
     if max_cols < 6:
         raise ValueError("TSV has too few columns to parse")
@@ -59,18 +61,21 @@ def sanitize_name(name: str) -> str:
 
 
 def configure_style() -> None:
-    sns.set_theme(style="whitegrid", context="talk", font_scale=0.9)
-    sns.set_palette("husl")
+    sns.set_theme(style="whitegrid", context="talk", font_scale=0.9, font="IBM Plex Sans")
+    sns.set_palette("colorblind")
     plt.rcParams.update({
         "figure.figsize": (11, 6.5),
         "axes.titleweight": "bold",
+        "axes.labelweight": "medium",
         "axes.spines.top": False,
         "axes.spines.right": False,
-        "grid.alpha": 0.25,
+        "axes.titlepad": 12,
+        "grid.alpha": 0.35,
+        "grid.linewidth": 0.8,
+        "legend.frameon": False,
         "lines.linewidth": 2.5,
         "lines.markersize": 4,
     })
-
 
 def get_graph_configs() -> list[dict]:
     """Define which graphs to create and how to group series."""
@@ -196,7 +201,7 @@ def main() -> int:
         output_dir = Path(args.output)
         created = create_graphs(data, output_dir, args.start_year, args.step)
         print(f"Created {created} chart(s) in {output_dir}")
-    except Exception as exc:
+    except FileNotFoundError as exc:  # It was `Exception` but ruff didn't like generic
         print(f"Error: {exc}")
         return 1
 
