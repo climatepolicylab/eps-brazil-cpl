@@ -145,7 +145,10 @@ def create_graphs(data: pd.DataFrame, output_dir: Path, start_year: int | None, 
         # Plot all matching series on one graph
         for _, row in matching_rows.iterrows():
             series = str(row["series"]).strip()
-            values = pd.to_numeric(row[value_cols], errors="coerce").tolist()
+            numeric_values = pd.Series(
+                pd.to_numeric(row[value_cols], errors="coerce")
+            )
+            values = numeric_values.tolist()
 
             if not all(pd.isna(v) for v in values):
                 label = extract_series_label(series)
