@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
 """
 Run EPS pipeline stages: pre-processing, model run, and post-processing.
 """
