@@ -37,3 +37,4 @@ csv_graphs
 .venv/
 __pycache__/
 *.pyc
+run_times.log
