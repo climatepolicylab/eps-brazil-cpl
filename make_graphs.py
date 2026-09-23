@@ -179,8 +179,8 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument("--input", required=True, help="Input TSV file")
-    parser.add_argument("--output", default="graph_outputs", help="Output directory for charts")
+    parser.add_argument("-i", "--input", required=True, help="Input TSV file")
+    parser.add_argument("-o", "--output", default="graph_outputs", help="Output directory for charts")
     parser.add_argument("--start-year", type=int, default=None, help="Starting year for x-axis")
     parser.add_argument("--step", type=float, default=1.0, help="Time step between data points")
 

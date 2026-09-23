@@ -93,7 +93,7 @@ def parse_args() -> argparse.Namespace:
         "--tsv", default=DEFAULT_TSV, help="Input TSV for graph generation"
     )
     parser.add_argument(
-        "--graphs-dir", default=DEFAULT_GRAPHS_DIR, help="Output directory for graphs"
+        "--graphs-output", default=DEFAULT_GRAPHS_DIR, help="Output directory for graphs"
     )
     parser.add_argument(
         "--slides-output", default=DEFAULT_SLIDES_PPTX, help="Output PPTX file"
