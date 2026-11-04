@@ -4,7 +4,8 @@ CSV Line Graph Generator
 
 Traverses directories to find CSV files and generates line graphs.
 Handles transposed CSV format where time runs across columns (first row)
-and labels are in the first column.
+and labels are in the first column. Automatically extracts and applies units
+to Y-axis labels based on detected CSV structure patterns.
 """
 
 import os
@@ -13,11 +14,25 @@ import argparse
 import re
 import csv
 from pathlib import Path
+import pandas as pd
 import matplotlib.pyplot as plt
 plt.matplotlib.use('Agg')  # Non-interactive backend
 
+GREEN = '\033[92m'
+RED = '\033[91m'
+DARK_YELLOW = '\033[33m'
+RESET = '\033[0m'
 
-def parse_transposed_csv(csv_path):
+# Terms to exclude from warning report (warnings still printed immediately)
+WARNING_EXCLUSIONS = [
+    'FoPITY',
+    'ESUfRaLCD',
+    'PERAC',
+    'PEAAC',
+]
+
+
+def parse_transposed_csv(csv_path, report=None):
     """
     Parse a CSV file where time is in the first row and labels in first column.
 
@@ -66,7 +81,10 @@ def parse_transposed_csv(csv_path):
             values = [float(v) if v.strip() else None for v in values]
             data_series[label] = values
         except ValueError:
-            print(f"Warning: Could not convert values for label '{label}' in {csv_path}")
+            warning_message = f"Could not convert values for label '{label}' in {csv_path}"
+            print(f"{DARK_YELLOW}Warning:{RESET} {warning_message}")
+            if report is not None and not any(term in csv_path for term in WARNING_EXCLUSIONS):
+                report['warnings'].append(warning_message)
             continue
 
     return y_axis_label, time_values, data_series
@@ -127,7 +145,7 @@ def create_line_graph(time_values, data_series, output_path, title=None, y_label
     plt.close()
 
 
-def process_csv_file(csv_path, input_root, output_root, output_format='png'):
+def process_csv_file(csv_path, input_root, output_root, output_format='png', report=None):
     """
     Process a single CSV file and generate graph.
 
@@ -138,10 +156,13 @@ def process_csv_file(csv_path, input_root, output_root, output_format='png'):
         output_format: 'png' or 'svg'
     """
     try:
-        y_axis_label, time_values, data_series = parse_transposed_csv(csv_path)
+        y_axis_label, time_values, data_series = parse_transposed_csv(csv_path, report=report)
 
         if not time_values or not data_series:
-            print(f"Skipping {csv_path}: insufficient data")
+            skipped_message = f"{csv_path}: insufficient data"
+            print(f"{DARK_YELLOW}Skipping:{RESET} {skipped_message}")
+            if report is not None:
+                report['skipped'].append(skipped_message)
             return False
 
         # Get relative path from input root
@@ -175,11 +196,14 @@ def process_csv_file(csv_path, input_root, output_root, output_format='png'):
         # Create graph
         create_line_graph(time_values, data_series, output_path, title=title, y_label=y_axis_label)
 
-        print(f"✓ Created graph: {output_path}")
+        print(f"{GREEN}✓{RESET} Created graph: {output_path}")
         return True
 
     except Exception as e:
-        print(f"✗ Error processing {csv_path}: {e}")
+        error_message = f"Error processing {csv_path}: {e}"
+        print(f"{RED}✗{RESET} {error_message}")
+        if report is not None:
+            report['errors'].append(error_message)
         return False
 
 
@@ -214,13 +238,38 @@ def traverse_and_process(root_dir, output_dir, output_format='png', recursive=Tr
     print(f"Output format: {output_format.upper()}")
     print("-" * 60)
 
+    report = {
+        'warnings': [],
+        'errors': [],
+        'skipped': [],
+    }
+
     success_count = 0
     for csv_file in csv_files:
-        if process_csv_file(csv_file, root_dir, output_dir, output_format):
+        if process_csv_file(csv_file, root_dir, output_dir, output_format, report=report):
             success_count += 1
 
     print("-" * 60)
-    print(f"Successfully processed {success_count}/{len(csv_files)} file(s)")
+
+    if report['skipped']:
+        print(f"\n{DARK_YELLOW}Skipping:{RESET} details")
+        for message in report['skipped']:
+            print(f"- {DARK_YELLOW}Skipping:{RESET} {message}")
+
+    if report['errors']:
+        print(f"\n{RED}Errors:{RESET}")
+        for message in report['errors']:
+            print(f"- {message}")
+
+    if report['warnings']:
+        print(f"\n{DARK_YELLOW}Warning:{RESET} details")
+        for message in report['warnings']:
+            print(f"- {DARK_YELLOW}Warning:{RESET} {message}")
+
+    print(f"\nSuccessfully processed {success_count}/{len(csv_files)} file(s)")
+    print(f"Skipped: {len(report['skipped'])}")
+    print(f"Errors: {len(report['errors'])}")
+    print(f"Warnings (w/ exclusions): {len(report['warnings'])}")
 
 
 def main():
