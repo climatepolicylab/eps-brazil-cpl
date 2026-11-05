@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Apr 09 2024
 Last updated on Jan 29 2025
@@ -7,11 +6,12 @@ Last updated on Jan 29 2025
 @author: Travis Franck
 """
 
+import argparse
 import os
 import sys
-import pandas as pd
 from enum import Enum
-import argparse
+
+import pandas as pd
 
 # --------------------------------------------------------
 # ANSI color codes for terminal output
@@ -74,27 +74,27 @@ def present_menu(stdscr):
             stdscr.clear()
             for idx, row in enumerate(choices):
                 if idx == selected_row_idx:
-                    stdscr.attron(curses.color_pair(1))
+                    stdscr.attron(curses.color_pair(1))  # pyright: ignore[reportPossiblyUnboundVariable]
                     stdscr.addstr(idx, 0, row)
-                    stdscr.attroff(curses.color_pair(1))
+                    stdscr.attroff(curses.color_pair(1))  # pyright: ignore[reportPossiblyUnboundVariable]
                 else:
                     stdscr.addstr(idx, 0, row)
             stdscr.refresh()
 
         # Initialize colors
-        curses.curs_set(0)
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+        curses.curs_set(0)  # pyright: ignore[reportPossiblyUnboundVariable]
+        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)  # pyright: ignore[reportPossiblyUnboundVariable]
 
         print_menu(stdscr, current_row)
 
         while True:
             key = stdscr.getch()
 
-            if key == curses.KEY_UP and current_row > 0:
+            if key == curses.KEY_UP and current_row > 0:  # pyright: ignore[reportPossiblyUnboundVariable]
                 current_row -= 1
-            elif key == curses.KEY_DOWN and current_row < len(choices) - 1:
+            elif key == curses.KEY_DOWN and current_row < len(choices) - 1:  # pyright: ignore[reportPossiblyUnboundVariable]
                 current_row += 1
-            elif key == curses.KEY_ENTER or key in [10, 13]:
+            elif key == curses.KEY_ENTER or key in [10, 13]:  # pyright: ignore[reportPossiblyUnboundVariable]
                 return choices[current_row]
 
             print_menu(stdscr, current_row)
@@ -162,7 +162,7 @@ elif args.menu_choice:
     root_directory = set_root_path(args.menu_choice)
 else:
     # Present a menu and set the path to the XLS/CSV files
-    selected_choice = curses.wrapper(present_menu)
+    selected_choice = curses.wrapper(present_menu)  # pyright: ignore[reportPossiblyUnboundVariable]
     if selected_choice == MenuChoices.CHOICE_CANCEL.value:
         print("Canceling CSV export")
         sys.exit(0)
