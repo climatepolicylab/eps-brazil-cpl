@@ -133,12 +133,12 @@ def export_tabs_to_csv(excel_file_path, tabs_to_export, output_dir, errors):
                 df.to_csv(csv_file_path, index=False)
 
                 print(f"{tab_name} from {excel_file_path} exported to {csv_file_path}")
-            except Exception as e:
-                error_msg = f"Error exporting {tab_name} from {excel_file_path} to CSV: {str(e)}"
+            except Exception as e:  # noqa: BLE001
+                error_msg = f"Error exporting {tab_name} from {excel_file_path} to CSV: {e!s}"
                 print(f"{RED}{error_msg}{RESET}")
                 errors.append(error_msg)
-    except Exception as e:
-        error_msg = f"Error opening Excel file {excel_file_path}: {str(e)}"
+    except Exception as e:  # noqa: BLE001
+        error_msg = f"Error opening Excel file {excel_file_path}: {e!s}"
         print(f"{RED}{error_msg}{RESET}")
         errors.append(error_msg)
 
@@ -174,7 +174,7 @@ print("Processing files in " + root_directory)
 # Recursively search for Excel files in subdirectories
 for root, dirs, files in os.walk(root_directory):
     for file in files:
-        if file.endswith(".xlsx") or file.endswith(".xls"):
+        if file.endswith((".xlsx", ".xls")):
             excel_file_path = os.path.join(root, file)
 
             # Find existing CSV files in the same directory
