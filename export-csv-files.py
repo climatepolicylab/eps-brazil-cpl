@@ -14,6 +14,12 @@ from enum import Enum
 import argparse
 
 # --------------------------------------------------------
+# ANSI color codes for terminal output
+RED = '\033[91m'
+GREEN = '\033[32m'
+RESET = '\033[0m'
+
+# --------------------------------------------------------
 # The string value should be the path relative to first directory
 class MenuChoices(Enum):
     CHOICE_CANCEL = r"Cancel"
@@ -106,7 +112,7 @@ def set_root_path(selection):
 
 # --------------------------------------------------------
 # Function to export tabs from an Excel file to CSV
-def export_tabs_to_csv(excel_file_path, tabs_to_export, output_dir):
+def export_tabs_to_csv(excel_file_path, tabs_to_export, output_dir, errors):
     try:
         # Open the Excel file
         pd.ExcelFile(excel_file_path)
@@ -128,15 +134,19 @@ def export_tabs_to_csv(excel_file_path, tabs_to_export, output_dir):
 
                 print(f"{tab_name} from {excel_file_path} exported to {csv_file_path}")
             except Exception as e:
-                print(
-                    f"Error exporting {tab_name} from {excel_file_path} to CSV: {str(e)}"
-                )
+                error_msg = f"Error exporting {tab_name} from {excel_file_path} to CSV: {str(e)}"
+                print(f"{RED}{error_msg}{RESET}")
+                errors.append(error_msg)
     except Exception as e:
-        print(f"Error opening Excel file {excel_file_path}: {str(e)}")
+        error_msg = f"Error opening Excel file {excel_file_path}: {str(e)}"
+        print(f"{RED}{error_msg}{RESET}")
+        errors.append(error_msg)
 
 
 # --------------------------------------------------------
 # main()
+
+errors = []  # Track all errors encountered during processing
 
 # Check to see if the user passed in a choice already when calling the script
 parser = argparse.ArgumentParser(description="EPS data export script to create CSV files.")
@@ -174,4 +184,19 @@ for root, dirs, files in os.walk(root_directory):
             tabs_to_export = [os.path.splitext(csv_file)[0] for csv_file in csv_files]
 
             # Call the export function, passing the output directory as the current directory
-            export_tabs_to_csv(excel_file_path, tabs_to_export, root)
+            export_tabs_to_csv(excel_file_path, tabs_to_export, root, errors)
+
+# --------------------------------------------------------
+# Print error summary
+# Filter out FoPITY errors
+filtered_errors = [error for error in errors if "FoPITY" not in error]
+
+if filtered_errors:
+    print(f"\n{RED}" + "="*80)
+    print(f"ERROR SUMMARY - {len(filtered_errors)} error(s) encountered:")
+    print("="*80 + f"{RESET}")
+    for i, error in enumerate(filtered_errors, 1):
+        print(f"{RED}{i}. {error}{RESET}")
+    print(f"{RED}" + "="*80 + f"{RESET}")
+else:
+    print(f"\n{GREEN}All files processed successfully with no errors. (FoPITY errors excluded.){RESET}")
