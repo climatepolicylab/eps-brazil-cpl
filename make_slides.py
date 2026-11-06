@@ -1,94 +1,108 @@
 #!/usr/bin/env -S uv run --script
 """
-Generate a PPTX slide deck from chart images using Quarto.
+Convert Marp markdown files to PPTX, PDF, or HTML.
 """
 
-from __future__ import annotations
-
 import argparse
-import shutil
 import subprocess
+import sys
 from pathlib import Path
 
+# Constants
+DEFAULT_OUTPUT_FORMATS = ["pptx"]
+SUPPORTED_FORMATS = ["pptx", "pdf", "html"]
+MARP_COMMAND = "marp"
 
-def build_qmd(title: str, images: list[Path]) -> str:
-    lines = [
-        "---",
-        f"title: \"{title}\"",
-        "format:",
-        "  pptx:",
-        "    slide-level: 2",
-        "---",
-        "",
+def convert_marp(input_path: Path, output_path: Path) -> None:
+    """Calls the marp command line tool to convert the file."""
+    # marp <input> --allow-local-files -o <output>
+    command = [
+        MARP_COMMAND,
+        str(input_path),
+        "--allow-local-files",
+        "--output",
+        str(output_path),
     ]
 
-    for image in images:
-        slide_title = image.stem.replace("_", " ")
-        lines.append(f"## {slide_title}")
-        lines.append("")
-        lines.append(f"![]({image.as_posix()})")
-        lines.append("")
-
-    return "\n".join(lines)
-
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        if result.stdout:
+            print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Error during conversion: {e.stderr}", file=sys.stderr)
+        raise
+    except FileNotFoundError:
+        raise RuntimeError(
+            f"The '{MARP_COMMAND}' command was not found. "
+            "Please install marp-cli (e.g., 'npm install -g @marp-team/marp-cli')."
+        )
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a PPTX slide deck from PNG or SVG charts",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        prog="make_slides_marp.py",
+        description="Convert Marp markdown files to PPTX, PDF, or HTML.",
+        epilog="""
+EXAMPLES:
+# Default: creates slides.marp.pptx
+  python make_slides_marp.py -i slides.marp.md
+
+# Create PDF version
+  python make_slides_marp.py -i slides.marp.md -f pdf
+
+# Create PDF, PPTX, and HTML versions
+  python make_slides_marp.py -i slides.marp.md -f pptx pdf html
+
+# Output to a specific directory
+  python make_slides_marp.py -i slides.marp.md -o ./exports/
+""",
+        formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    parser.add_argument("--input-dir", default="graph_outputs", help="Directory containing chart images")
-    parser.add_argument("--output", default="eps_slides.pptx", help="Output PPTX file")
-    parser.add_argument("--title", default="EPS Results", help="Presentation title")
-    parser.add_argument("--image-ext", choices=["png", "svg"], default="png", help="Image extension to include")
+    parser.add_argument("-i", "--input", required=True, help="Input Marp markdown file")
+    parser.add_argument("-o", "--output", help="Output path (file or directory)")
+    parser.add_argument(
+        "-f", "--format",
+        metavar="FORMAT",
+        choices=SUPPORTED_FORMATS,
+        nargs="+",
+        default=DEFAULT_OUTPUT_FORMATS,
+        help=f"Output format(s) ({', '.join(SUPPORTED_FORMATS)}) (default: pptx)"
+    )
 
     return parser.parse_args()
 
-
 def main() -> int:
     args = parse_args()
+    input_path = Path(args.input)
 
-    if shutil.which("quarto") is None:
-        print("Error: 'quarto' not found in PATH")
+    if not input_path.exists():
+        print(f"Error: Input file not found: {input_path}")
         return 1
 
-    input_dir = Path(args.input_dir)
-    if not input_dir.exists():
-        print(f"Error: input directory not found: {input_dir}")
-        return 1
+    formats = args.format
+    success_count = 0
 
-    images = sorted(input_dir.rglob(f"*.{args.image_ext}"))
-    if not images:
-        print(f"Error: no *.{args.image_ext} images found in {input_dir}")
-        return 1
+    for fmt in formats:
+        # Determine output path for this format
+        if args.output:
+            out_dir = Path(args.output)
+            if out_dir.is_dir():
+                output_path = out_dir / input_path.with_suffix(f".{fmt}").name
+            else:
+                # User provided a filename, replace its extension
+                output_path = out_dir.with_suffix(f".{fmt}")
+        else:
+            # Derive output path from input path
+            output_path = input_path.with_suffix(f".{fmt}")
 
-    output_path = Path(args.output)
-    output_dir = output_path.parent if output_path.parent.as_posix() != "." else Path.cwd()
-    output_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            convert_marp(input_path, output_path)
+            print(f"Successfully converted {input_path} to {output_path}")
+            success_count += 1
+        except (subprocess.CalledProcessError, RuntimeError) as e:
+            print(f"Error converting to {fmt}: {e}", file=sys.stderr)
 
-    qmd_path = output_dir / "eps_slides.qmd"
-    qmd_path.write_text(build_qmd(args.title, images), encoding="utf-8")
-
-    cmd = [
-        "quarto",
-        "render",
-        qmd_path.as_posix(),
-        "--to",
-        "pptx",
-        "--output",
-        output_path.name,
-    ]
-
-    print(f"Rendering slides with: {' '.join(cmd)}")
-    result = subprocess.run(cmd, check=False, cwd=output_dir)
-    if result.returncode != 0:
-        print(f"Error: Quarto render failed with exit code {result.returncode}")
-        return 1
-
-    print(f"Created slides: {output_path}")
-    return 0
-
+    return 0 if success_count == len(formats) else 1
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

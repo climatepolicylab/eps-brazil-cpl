@@ -5,8 +5,8 @@
 # Example: ./time_model_run.sh "/Applications/VensimDSSMC.app/Contents/MacOS/VensimDSSMC" "run_model.cmd"
 
 # Default values
-VENSIM_APP_NAME="VensimDSSMC.app"
-VENSIM_PATH="${1:-/Applications/$VENSIM_APP_NAME/Contents/MacOS/VensimDSSMC}"
+VENSIM_APP_NAME="VensimDSS.app"
+VENSIM_PATH="${1:-/Applications/$VENSIM_APP_NAME/Contents/MacOS/VensimDSS}"
 SCRIPT_FILE="${2:-run_model.cmd}"
 LOG_FILE="run_times.log"
 
