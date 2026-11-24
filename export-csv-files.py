@@ -8,6 +8,7 @@ Last updated on Jan 29 2025
 
 import argparse
 import os
+import shutil
 import sys
 from enum import Enum
 
@@ -162,7 +163,20 @@ elif args.menu_choice:
     root_directory = set_root_path(args.menu_choice)
 else:
     # Present a menu and set the path to the XLS/CSV files
-    selected_choice = curses.wrapper(present_menu)  # pyright: ignore[reportPossiblyUnboundVariable]
+    try:
+        selected_choice = curses.wrapper(present_menu)  # pyright: ignore[reportPossiblyUnboundVariable]
+    except curses.error:  # pyright: ignore[reportPossiblyUnboundVariable]
+        # curses raises this when a line doesn't fit, i.e., the terminal window is too small
+        menu_items = [choice.value for choice in MenuChoices]
+        need_rows = len(menu_items)
+        need_cols = max(len(item) for item in menu_items) + 1
+        have_cols, have_rows = shutil.get_terminal_size()
+        print(f"{RED}Error: the terminal window is too small to display the menu "
+              f"(need at least {need_rows} rows x {need_cols} columns; "
+              f"current size is {have_rows} x {have_cols}).{RESET}")
+        print("Enlarge the terminal window and run the script again, or skip the menu with "
+              "--menu_choice <option> or --dirpath <path>.")
+        sys.exit(1)
     if selected_choice == MenuChoices.CHOICE_CANCEL.value:
         print("Canceling CSV export")
         sys.exit(0)
